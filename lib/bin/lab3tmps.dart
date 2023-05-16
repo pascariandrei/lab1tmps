@@ -204,7 +204,7 @@ class Attendee extends Stateful {
 
 void main() {
 //VISITOR
-print("VISITOR");
+  print("VISITOR");
   final elementA = ElementA();
   final elementB = ElementB();
 
@@ -215,13 +215,13 @@ print("VISITOR");
 
 
   //TEMPLATE METHOD
-print("\nTEMPLATE");
+  print("\nTEMPLATE");
 
   final abstractClass = ConcreteClass();
   abstractClass.templateMethod();
 
   //ITERATOR
-print("\nITERATOR");
+  print("\nITERATOR");
 
   final myIterable = MyIterable(1, 5);
   final iterator = myIterable.iterator;
@@ -231,7 +231,7 @@ print("\nITERATOR");
     print(value);
   }
   //MEMENTO
-print("\nMEMENTO");
+  print("\nMEMENTO");
 
   var me = Originator("Returned from store");
   me.state = "Placing car keys down";
@@ -248,7 +248,7 @@ print("\nMEMENTO");
   me.state = "Going back to store for pickles";
 
   //MEDIATOR
-print("\nMEDIATOR");
+  print("\nMEDIATOR");
 
   var curly = Attendee("Curly");
   var larry = Attendee("Larry");

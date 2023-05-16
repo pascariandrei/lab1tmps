@@ -38,7 +38,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   dcdg: ^4.1.0
   freezed: ^1.1.0
-
+  enough_mail: ^2.1.1
+  path_provider:
+  pdf: ^3.10.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
