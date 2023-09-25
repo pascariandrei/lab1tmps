@@ -1,50 +1,32 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:encrypt/encrypt.dart';
 
 void main() {
-  ex6();
-}
+  const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  Random _rnd = Random();
 
-void ex2() {
-  String? inpNum = stdin.readLineSync();
-  int.parse(inpNum!) % 2 == 1 ? print(" is odd") : print("is even");
-}
+  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
 
-void ex3() {
-  Random random = Random();
-  List<int> list = [];
-  for (var i = 0; i < 50; i++) {
-    list.add(random.nextInt(10));
-  }
-  print("my list before $list");
+  final aesKey = Key.fromUtf8('123456789abcdefd');
 
-  list.removeWhere((e) => e > 5);
-  print("my list after $list");
-}
+  final initializationVector = IV.fromUtf8(getRandomString(16));
+  final encrypter = Encrypter(AES(aesKey, mode: AESMode.cbc));
 
-void ex5() {
-  /*and write a program that returns a list that contains only the elements that are common between them (without duplicates).
-  Make sure your program works on two lists of different sizes*/
-  Random random = Random();
-  List<int> list1 = [];
-  List<int> list2 = [];
-  List<int> resultList = [];
-  for (var i = 0; i < 5; i++) {
-    list1.add(random.nextInt(10));
-  }
-  for (var i = 0; i < 25; i++) {
-    list2.add(random.nextInt(10));
-  }
-  print("$list1 \n$list2");
+  const inputFile = 'D:/Anul VII/dart single file run project/lib/input.txt';
+  const encryptedFile = 'D:/Anul VII/dart single file run project/lib/encrypted.txt';
+  const decryptedFile = 'D:/Anul VII/dart single file run project/lib/decrypted.txt';
 
-  for (var i in list1) {
-    for (var j in list2) {
-      if (i == j && !resultList.contains(i)) resultList.add(i);
-    }
-  }
-  print(resultList);
-}
+  final inputFileContent = File(inputFile).readAsStringSync();
 
-void ex6(){
-  /**/
+  final encryptedData = encrypter.encrypt(inputFileContent, iv: initializationVector);
+  File(encryptedFile).writeAsStringSync(encryptedData.base64);
+
+  final decryptedData = encrypter.decrypt64(File(encryptedFile).readAsStringSync(), iv: initializationVector);
+  File(decryptedFile).writeAsStringSync(decryptedData);
+
+  print(utf8.decode(initializationVector.bytes));
+  print(File(encryptedFile).readAsStringSync());
+  print(decryptedData);
 }
