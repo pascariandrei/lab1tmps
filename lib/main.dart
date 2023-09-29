@@ -19,7 +19,6 @@ void main() {
   const decryptedFile = 'D:/Anul VII/dart single file run project/lib/decrypted.txt';
 
   final inputFileContent = File(inputFile).readAsStringSync();
-
   final encryptedData = encrypter.encrypt(inputFileContent, iv: initializationVector);
   File(encryptedFile).writeAsStringSync(encryptedData.base64);
 
