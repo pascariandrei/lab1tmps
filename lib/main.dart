@@ -1,31 +1,62 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
-import 'package:encrypt/encrypt.dart';
+import 'dart:typed_data';
+import 'package:pointycastle/api.dart';
+import 'package:pointycastle/asymmetric/api.dart';
+import 'package:pointycastle/asymmetric/rsa.dart';
+import 'package:pointycastle/key_generators/api.dart';
+import 'package:pointycastle/key_generators/rsa_key_generator.dart';
 
 void main() {
-  const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-  Random _rnd = Random();
+  final keyPair = generateRSAKeyPair();
 
-  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+  const inputText = 'Secret';
 
-  final aesKey = Key.fromUtf8('123456789abcdefd');
+  try {
+    final encryptedBytes = encryptMessage(inputText, keyPair.publicKey);
 
-  final initializationVector = IV.fromUtf8(getRandomString(16));
-  final encrypter = Encrypter(AES(aesKey, mode: AESMode.cbc));
+    final decryptedText = decryptMessage(encryptedBytes, keyPair.privateKey);
 
-  const inputFile = 'D:/Anul VII/dart single file run project/lib/input.txt';
-  const encryptedFile = 'D:/Anul VII/dart single file run project/lib/encrypted.txt';
-  const decryptedFile = 'D:/Anul VII/dart single file run project/lib/decrypted.txt';
 
-  final inputFileContent = File(inputFile).readAsStringSync();
-  final encryptedData = encrypter.encrypt(inputFileContent, iv: initializationVector);
-  File(encryptedFile).writeAsStringSync(encryptedData.base64);
 
-  final decryptedData = encrypter.decrypt64(File(encryptedFile).readAsStringSync(), iv: initializationVector);
-  File(decryptedFile).writeAsStringSync(decryptedData);
-
-  print(utf8.decode(initializationVector.bytes));
-  print(File(encryptedFile).readAsStringSync());
-  print(decryptedData);
+    print('Mesaj original: $inputText');
+    print('Mesaj criptat: ${base64.encode(encryptedBytes)}');
+    print('Mesaj decriptat: $decryptedText');
+  }   catch (e) {
+    print('Error: ${e}');
+  }
 }
+
+AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAKeyPair() {
+  final secureRandom = SecureRandom('Fortuna')..seed(KeyParameter(Uint8List(32)));
+  BigInt p = BigInt.from(61);
+  BigInt q = BigInt.from(53);
+  BigInt n = p * q;
+  const int keyLength = 2048;
+  final keyGen = RSAKeyGenerator() //algoritmul de generare a cheii
+    ..init(ParametersWithRandom(
+      RSAKeyGeneratorParameters(n, keyLength, 64), // 1 - (1/2)^64 probability
+      secureRandom,
+    ));
+
+  final keyPair = keyGen.generateKeyPair();
+
+  return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(
+    keyPair.publicKey as RSAPublicKey,
+    keyPair.privateKey as RSAPrivateKey,
+  );
+}
+
+Uint8List encryptMessage(String plaintext, RSAPublicKey publicKey) {
+  final cipher = RSAEngine()..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
+
+  final plaintextBytes = Uint8List.fromList(plaintext.codeUnits);
+  return cipher.process(Uint8List.fromList(plaintextBytes));
+}
+
+String decryptMessage(Uint8List encryptedBytes, RSAPrivateKey privateKey) {
+  final cipher = RSAEngine()..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
+
+  final decryptedBytes = cipher.process(Uint8List.fromList(encryptedBytes));
+  return String.fromCharCodes(decryptedBytes);
+}
+

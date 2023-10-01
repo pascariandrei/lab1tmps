@@ -32,6 +32,9 @@ dependencies:
   path_provider:
   pdf: ^3.10.1
   encrypt:
+  pointycastle:
+  pem:
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
